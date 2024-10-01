@@ -1,0 +1,45 @@
+SWAP memory upgrade 
+
+# 1 přidal jsem disk na cloudu u VM - stačí 50GB
+
+	na serveru se zobrazí jako sdd
+	sdd            8:48   0  100G  0 disk
+
+# vytvoříme partition
+	pvcreate /dev/sdd
+
+# vypneme swap
+	
+	swapoff -v /dev/vg00/swap
+
+# rozšíříme vg00 o /dev/sdd
+	
+	vgextend vg00 /dev/sdd
+
+# uděláme resize swapu
+	
+	lvresize -L 16G /dev/vg00/swap
+
+# znovu vytvoření a format swap oddílu
+
+	mkswap /dev/vg00/swap
+
+# zkontrolovat záznam v /etc/fstab
+
+ 	/dev/mapper/vg00-swap   none   swap    defaults   0 0
+
+# zapnout swap oddíl
+
+	swapon /dev/vg00/swap
+
+# a zkontrolovat 
+	 
+	swapon --show
+
+NAME      TYPE      SIZE USED PRIO
+/dev/dm-1 partition  16G   0B   -2
+
+INFRA [root@sas01-swap ~]# free -h
+               total        used        free      shared  buff/cache   available
+Mem:            30Gi       816Mi        29Gi       9.0Mi       496Mi        30Gi
+Swap:           15Gi          0B        15Gi
